@@ -1,0 +1,22 @@
+# Program: 03_pick_samples_vcf.condor
+# Author: Rene Welch
+# Created: 2020-09-01
+# Updated: 2020-09-04
+# Purpose: Wrapper to select samples from vcf files using condor
+
+universe         = vanilla
+executable       = /z/Comp/onglab/programs/bcftools/bin/bcftools
+args             = view $(input) -S $(samplefile) -O z -o $(output).gz
+
+request_memory   = 10 GB
+on_exit_hold     = (ExitBySignal == True) || (ExitCode != 0)
+periodic_release = (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 180)
+outdir           = ./condor
+output           = $(outdir)/out2/03_bcftools_subset_samples.$(cluster).$(process).out
+error            = $(outdir)/err/03_bcftools_subset_samples.$(cluster).$(process).err
+log              = $(outdir)/log/03_bcftools_subset_samples.$(cluster).$(process).log
+
+queue_file       = ./condor/queues/2020_09_03_subset_samples.csv
+batch_name       = bcftools_subset
+
+queue input, samplefile, output from $(queue_file)

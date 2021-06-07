@@ -1,0 +1,375 @@
+# Program: 04_merge_samples_vcf.condor
+# Author: Rene Welch
+# Created: 2020-09-01
+# Updated: 2020-09-04
+# Purpose: Wrapper to merge samples into a .vcf.gz file using condor
+
+universe         = vanilla
+executable       = /z/Comp/onglab/programs/bcftools/bin/bcftools
+args             = merge $(file1) $(file2) $(file3) $(file4) $(file5) $(file6) $(file7) $(file8) $(file9) $(file10) $(file11) $(file12) -O z -o $(outfile)
+
+basedir          = /z/Comp/uwcccseq/rwelch/WarrenAndersen_Shaneda/GWAS_colorecal_vitD
+
+request_memory   = 10 GB
+on_exit_hold     = (ExitBySignal == True) || (ExitCode != 0)
+periodic_release = (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 180)
+outdir           = ./condor
+output           = $(outdir)/out/04_bcftools_merge_samples.$(cluster).$(process).out
+error            = $(outdir)/err/04_bcftools_merge_samples.$(cluster).$(process).err
+log              = $(outdir)/log/04_bcftools_merge_samples.$(cluster).$(process).log
+batch_name       = bcftools_merge
+indir            = $(basedir)/extracted_data/SCCS/imputation/aux_impute
+outdir2          = $(basedir)/extracted_data/SCCS/imputation/merge_impute
+
+
+chrom            = chr1
+file1            = $(indir)/SCCS_AA_COPD_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file2            = $(indir)/SCCS_BC_CRC_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file3            = $(indir)/SCCS_BC_iCOGS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file4            = $(indir)/SCCS_BC_ROOT_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file5            = $(indir)/SCCS_CRC_GECCO_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file6            = $(indir)/SCCS_CRC_Hawaii_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file7            = $(indir)/SCCS_Lung_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file8            = $(indir)/SCCS_Lung_GWAS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file9            = $(indir)/SCCS_pancreatic_cancer_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file10           = $(indir)/SCCS_prostate_control_Oncoarray_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file11           = $(indir)/SCCS_Prostate_USC_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file12           = $(indir)/SCCS_Vitamin_D_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+outfile          = $(outdir2)/SCCS_merged_vdbp_cancer_$(chrom).vcf.gz
+queue 1
+
+chrom            = chr2
+file1            = $(indir)/SCCS_AA_COPD_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file2            = $(indir)/SCCS_BC_CRC_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file3            = $(indir)/SCCS_BC_iCOGS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file4            = $(indir)/SCCS_BC_ROOT_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file5            = $(indir)/SCCS_CRC_GECCO_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file6            = $(indir)/SCCS_CRC_Hawaii_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file7            = $(indir)/SCCS_Lung_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file8            = $(indir)/SCCS_Lung_GWAS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file9            = $(indir)/SCCS_pancreatic_cancer_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file10           = $(indir)/SCCS_prostate_control_Oncoarray_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file11           = $(indir)/SCCS_Prostate_USC_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file12           = $(indir)/SCCS_Vitamin_D_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+outfile          = $(outdir2)/SCCS_merged_vdbp_cancer_$(chrom).vcf.gz
+queue 1
+
+chrom            = chr3
+file1            = $(indir)/SCCS_AA_COPD_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file2            = $(indir)/SCCS_BC_CRC_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file3            = $(indir)/SCCS_BC_iCOGS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file4            = $(indir)/SCCS_BC_ROOT_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file5            = $(indir)/SCCS_CRC_GECCO_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file6            = $(indir)/SCCS_CRC_Hawaii_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file7            = $(indir)/SCCS_Lung_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file8            = $(indir)/SCCS_Lung_GWAS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file9            = $(indir)/SCCS_pancreatic_cancer_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file10           = $(indir)/SCCS_prostate_control_Oncoarray_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file11           = $(indir)/SCCS_Prostate_USC_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file12           = $(indir)/SCCS_Vitamin_D_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+outfile          = $(outdir2)/SCCS_merged_vdbp_cancer_$(chrom).vcf.gz
+queue 1
+
+chrom            = chr4
+file1            = $(indir)/SCCS_AA_COPD_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file2            = $(indir)/SCCS_BC_CRC_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file3            = $(indir)/SCCS_BC_iCOGS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file4            = $(indir)/SCCS_BC_ROOT_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file5            = $(indir)/SCCS_CRC_GECCO_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file6            = $(indir)/SCCS_CRC_Hawaii_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file7            = $(indir)/SCCS_Lung_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file8            = $(indir)/SCCS_Lung_GWAS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file9            = $(indir)/SCCS_pancreatic_cancer_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file10           = $(indir)/SCCS_prostate_control_Oncoarray_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file11           = $(indir)/SCCS_Prostate_USC_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file12           = $(indir)/SCCS_Vitamin_D_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+outfile          = $(outdir2)/SCCS_merged_vdbp_cancer_$(chrom).vcf.gz
+queue 1
+
+chrom            = chr5
+file1            = $(indir)/SCCS_AA_COPD_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file2            = $(indir)/SCCS_BC_CRC_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file3            = $(indir)/SCCS_BC_iCOGS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file4            = $(indir)/SCCS_BC_ROOT_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file5            = $(indir)/SCCS_CRC_GECCO_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file6            = $(indir)/SCCS_CRC_Hawaii_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file7            = $(indir)/SCCS_Lung_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file8            = $(indir)/SCCS_Lung_GWAS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file9            = $(indir)/SCCS_pancreatic_cancer_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file10           = $(indir)/SCCS_prostate_control_Oncoarray_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file11           = $(indir)/SCCS_Prostate_USC_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file12           = $(indir)/SCCS_Vitamin_D_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+outfile          = $(outdir2)/SCCS_merged_vdbp_cancer_$(chrom).vcf.gz
+queue 1
+
+chrom            = chr6
+file1            = $(indir)/SCCS_AA_COPD_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file2            = $(indir)/SCCS_BC_CRC_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file3            = $(indir)/SCCS_BC_iCOGS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file4            = $(indir)/SCCS_BC_ROOT_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file5            = $(indir)/SCCS_CRC_GECCO_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file6            = $(indir)/SCCS_CRC_Hawaii_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file7            = $(indir)/SCCS_Lung_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file8            = $(indir)/SCCS_Lung_GWAS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file9            = $(indir)/SCCS_pancreatic_cancer_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file10           = $(indir)/SCCS_prostate_control_Oncoarray_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file11           = $(indir)/SCCS_Prostate_USC_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file12           = $(indir)/SCCS_Vitamin_D_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+outfile          = $(outdir2)/SCCS_merged_vdbp_cancer_$(chrom).vcf.gz
+queue 1
+
+chrom            = chr7
+file1            = $(indir)/SCCS_AA_COPD_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file2            = $(indir)/SCCS_BC_CRC_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file3            = $(indir)/SCCS_BC_iCOGS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file4            = $(indir)/SCCS_BC_ROOT_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file5            = $(indir)/SCCS_CRC_GECCO_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file6            = $(indir)/SCCS_CRC_Hawaii_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file7            = $(indir)/SCCS_Lung_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file8            = $(indir)/SCCS_Lung_GWAS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file9            = $(indir)/SCCS_pancreatic_cancer_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file10           = $(indir)/SCCS_prostate_control_Oncoarray_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file11           = $(indir)/SCCS_Prostate_USC_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file12           = $(indir)/SCCS_Vitamin_D_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+outfile          = $(outdir2)/SCCS_merged_vdbp_cancer_$(chrom).vcf.gz
+queue 1
+
+chrom            = chr8
+file1            = $(indir)/SCCS_AA_COPD_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file2            = $(indir)/SCCS_BC_CRC_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file3            = $(indir)/SCCS_BC_iCOGS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file4            = $(indir)/SCCS_BC_ROOT_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file5            = $(indir)/SCCS_CRC_GECCO_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file6            = $(indir)/SCCS_CRC_Hawaii_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file7            = $(indir)/SCCS_Lung_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file8            = $(indir)/SCCS_Lung_GWAS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file9            = $(indir)/SCCS_pancreatic_cancer_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file10           = $(indir)/SCCS_prostate_control_Oncoarray_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file11           = $(indir)/SCCS_Prostate_USC_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file12           = $(indir)/SCCS_Vitamin_D_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+outfile          = $(outdir2)/SCCS_merged_vdbp_cancer_$(chrom).vcf.gz
+queue 1
+
+chrom            = chr9
+file1            = $(indir)/SCCS_AA_COPD_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file2            = $(indir)/SCCS_BC_CRC_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file3            = $(indir)/SCCS_BC_iCOGS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file4            = $(indir)/SCCS_BC_ROOT_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file5            = $(indir)/SCCS_CRC_GECCO_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file6            = $(indir)/SCCS_CRC_Hawaii_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file7            = $(indir)/SCCS_Lung_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file8            = $(indir)/SCCS_Lung_GWAS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file9            = $(indir)/SCCS_pancreatic_cancer_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file10           = $(indir)/SCCS_prostate_control_Oncoarray_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file11           = $(indir)/SCCS_Prostate_USC_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file12           = $(indir)/SCCS_Vitamin_D_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+outfile          = $(outdir2)/SCCS_merged_vdbp_cancer_$(chrom).vcf.gz
+queue 1
+
+chrom            = chr10
+file1            = $(indir)/SCCS_AA_COPD_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file2            = $(indir)/SCCS_BC_CRC_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file3            = $(indir)/SCCS_BC_iCOGS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file4            = $(indir)/SCCS_BC_ROOT_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file5            = $(indir)/SCCS_CRC_GECCO_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file6            = $(indir)/SCCS_CRC_Hawaii_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file7            = $(indir)/SCCS_Lung_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file8            = $(indir)/SCCS_Lung_GWAS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file9            = $(indir)/SCCS_pancreatic_cancer_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file10           = $(indir)/SCCS_prostate_control_Oncoarray_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file11           = $(indir)/SCCS_Prostate_USC_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file12           = $(indir)/SCCS_Vitamin_D_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+outfile          = $(outdir2)/SCCS_merged_vdbp_cancer_$(chrom).vcf.gz
+queue 1
+
+chrom            = chr11
+file1            = $(indir)/SCCS_AA_COPD_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file2            = $(indir)/SCCS_BC_CRC_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file3            = $(indir)/SCCS_BC_iCOGS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file4            = $(indir)/SCCS_BC_ROOT_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file5            = $(indir)/SCCS_CRC_GECCO_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file6            = $(indir)/SCCS_CRC_Hawaii_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file7            = $(indir)/SCCS_Lung_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file8            = $(indir)/SCCS_Lung_GWAS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file9            = $(indir)/SCCS_pancreatic_cancer_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file10           = $(indir)/SCCS_prostate_control_Oncoarray_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file11           = $(indir)/SCCS_Prostate_USC_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file12           = $(indir)/SCCS_Vitamin_D_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+outfile          = $(outdir2)/SCCS_merged_vdbp_cancer_$(chrom).vcf.gz
+queue 1
+
+chrom            = chr12
+file1            = $(indir)/SCCS_AA_COPD_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file2            = $(indir)/SCCS_BC_CRC_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file3            = $(indir)/SCCS_BC_iCOGS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file4            = $(indir)/SCCS_BC_ROOT_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file5            = $(indir)/SCCS_CRC_GECCO_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file6            = $(indir)/SCCS_CRC_Hawaii_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file7            = $(indir)/SCCS_Lung_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file8            = $(indir)/SCCS_Lung_GWAS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file9            = $(indir)/SCCS_pancreatic_cancer_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file10           = $(indir)/SCCS_prostate_control_Oncoarray_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file11           = $(indir)/SCCS_Prostate_USC_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file12           = $(indir)/SCCS_Vitamin_D_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+outfile          = $(outdir2)/SCCS_merged_vdbp_cancer_$(chrom).vcf.gz
+queue 1
+
+chrom            = chr13
+file1            = $(indir)/SCCS_AA_COPD_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file2            = $(indir)/SCCS_BC_CRC_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file3            = $(indir)/SCCS_BC_iCOGS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file4            = $(indir)/SCCS_BC_ROOT_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file5            = $(indir)/SCCS_CRC_GECCO_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file6            = $(indir)/SCCS_CRC_Hawaii_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file7            = $(indir)/SCCS_Lung_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file8            = $(indir)/SCCS_Lung_GWAS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file9            = $(indir)/SCCS_pancreatic_cancer_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file10           = $(indir)/SCCS_prostate_control_Oncoarray_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file11           = $(indir)/SCCS_Prostate_USC_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file12           = $(indir)/SCCS_Vitamin_D_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+outfile          = $(outdir2)/SCCS_merged_vdbp_cancer_$(chrom).vcf.gz
+queue 1
+
+chrom            = chr14
+file1            = $(indir)/SCCS_AA_COPD_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file2            = $(indir)/SCCS_BC_CRC_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file3            = $(indir)/SCCS_BC_iCOGS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file4            = $(indir)/SCCS_BC_ROOT_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file5            = $(indir)/SCCS_CRC_GECCO_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file6            = $(indir)/SCCS_CRC_Hawaii_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file7            = $(indir)/SCCS_Lung_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file8            = $(indir)/SCCS_Lung_GWAS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file9            = $(indir)/SCCS_pancreatic_cancer_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file10           = $(indir)/SCCS_prostate_control_Oncoarray_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file11           = $(indir)/SCCS_Prostate_USC_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file12           = $(indir)/SCCS_Vitamin_D_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+outfile          = $(outdir2)/SCCS_merged_vdbp_cancer_$(chrom).vcf.gz
+queue 1
+
+chrom            = chr15
+file1            = $(indir)/SCCS_AA_COPD_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file2            = $(indir)/SCCS_BC_CRC_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file3            = $(indir)/SCCS_BC_iCOGS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file4            = $(indir)/SCCS_BC_ROOT_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file5            = $(indir)/SCCS_CRC_GECCO_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file6            = $(indir)/SCCS_CRC_Hawaii_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file7            = $(indir)/SCCS_Lung_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file8            = $(indir)/SCCS_Lung_GWAS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file9            = $(indir)/SCCS_pancreatic_cancer_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file10           = $(indir)/SCCS_prostate_control_Oncoarray_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file11           = $(indir)/SCCS_Prostate_USC_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file12           = $(indir)/SCCS_Vitamin_D_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+outfile          = $(outdir2)/SCCS_merged_vdbp_cancer_$(chrom).vcf.gz
+queue 1
+
+chrom            = chr16
+file1            = $(indir)/SCCS_AA_COPD_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file2            = $(indir)/SCCS_BC_CRC_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file3            = $(indir)/SCCS_BC_iCOGS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file4            = $(indir)/SCCS_BC_ROOT_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file5            = $(indir)/SCCS_CRC_GECCO_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file6            = $(indir)/SCCS_CRC_Hawaii_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file7            = $(indir)/SCCS_Lung_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file8            = $(indir)/SCCS_Lung_GWAS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file9            = $(indir)/SCCS_pancreatic_cancer_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file10           = $(indir)/SCCS_prostate_control_Oncoarray_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file11           = $(indir)/SCCS_Prostate_USC_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file12           = $(indir)/SCCS_Vitamin_D_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+outfile          = $(outdir2)/SCCS_merged_vdbp_cancer_$(chrom).vcf.gz
+queue 1
+
+chrom            = chr17
+file1            = $(indir)/SCCS_AA_COPD_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file2            = $(indir)/SCCS_BC_CRC_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file3            = $(indir)/SCCS_BC_iCOGS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file4            = $(indir)/SCCS_BC_ROOT_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file5            = $(indir)/SCCS_CRC_GECCO_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file6            = $(indir)/SCCS_CRC_Hawaii_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file7            = $(indir)/SCCS_Lung_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file8            = $(indir)/SCCS_Lung_GWAS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file9            = $(indir)/SCCS_pancreatic_cancer_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file10           = $(indir)/SCCS_prostate_control_Oncoarray_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file11           = $(indir)/SCCS_Prostate_USC_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file12           = $(indir)/SCCS_Vitamin_D_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+outfile          = $(outdir2)/SCCS_merged_vdbp_cancer_$(chrom).vcf.gz
+queue 1
+
+chrom            = chr18
+file1            = $(indir)/SCCS_AA_COPD_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file2            = $(indir)/SCCS_BC_CRC_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file3            = $(indir)/SCCS_BC_iCOGS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file4            = $(indir)/SCCS_BC_ROOT_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file5            = $(indir)/SCCS_CRC_GECCO_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file6            = $(indir)/SCCS_CRC_Hawaii_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file7            = $(indir)/SCCS_Lung_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file8            = $(indir)/SCCS_Lung_GWAS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file9            = $(indir)/SCCS_pancreatic_cancer_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file10           = $(indir)/SCCS_prostate_control_Oncoarray_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file11           = $(indir)/SCCS_Prostate_USC_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file12           = $(indir)/SCCS_Vitamin_D_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+outfile          = $(outdir2)/SCCS_merged_vdbp_cancer_$(chrom).vcf.gz
+queue 1
+
+chrom            = chr19
+file1            = $(indir)/SCCS_AA_COPD_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file2            = $(indir)/SCCS_BC_CRC_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file3            = $(indir)/SCCS_BC_iCOGS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file4            = $(indir)/SCCS_BC_ROOT_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file5            = $(indir)/SCCS_CRC_GECCO_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file6            = $(indir)/SCCS_CRC_Hawaii_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file7            = $(indir)/SCCS_Lung_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file8            = $(indir)/SCCS_Lung_GWAS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file9            = $(indir)/SCCS_pancreatic_cancer_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file10           = $(indir)/SCCS_prostate_control_Oncoarray_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file11           = $(indir)/SCCS_Prostate_USC_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file12           = $(indir)/SCCS_Vitamin_D_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+outfile          = $(outdir2)/SCCS_merged_vdbp_cancer_$(chrom).vcf.gz
+queue 1
+
+chrom            = chr20
+file1            = $(indir)/SCCS_AA_COPD_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file2            = $(indir)/SCCS_BC_CRC_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file3            = $(indir)/SCCS_BC_iCOGS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file4            = $(indir)/SCCS_BC_ROOT_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file5            = $(indir)/SCCS_CRC_GECCO_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file6            = $(indir)/SCCS_CRC_Hawaii_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file7            = $(indir)/SCCS_Lung_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file8            = $(indir)/SCCS_Lung_GWAS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file9            = $(indir)/SCCS_pancreatic_cancer_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file10           = $(indir)/SCCS_prostate_control_Oncoarray_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file11           = $(indir)/SCCS_Prostate_USC_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file12           = $(indir)/SCCS_Vitamin_D_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+outfile          = $(outdir2)/SCCS_merged_vdbp_cancer_$(chrom).vcf.gz
+queue 1
+
+chrom            = chr21
+file1            = $(indir)/SCCS_AA_COPD_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file2            = $(indir)/SCCS_BC_CRC_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file3            = $(indir)/SCCS_BC_iCOGS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file4            = $(indir)/SCCS_BC_ROOT_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file5            = $(indir)/SCCS_CRC_GECCO_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file6            = $(indir)/SCCS_CRC_Hawaii_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file7            = $(indir)/SCCS_Lung_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file8            = $(indir)/SCCS_Lung_GWAS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file9            = $(indir)/SCCS_pancreatic_cancer_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file10           = $(indir)/SCCS_prostate_control_Oncoarray_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file11           = $(indir)/SCCS_Prostate_USC_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file12           = $(indir)/SCCS_Vitamin_D_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+outfile          = $(outdir2)/SCCS_merged_vdbp_cancer_$(chrom).vcf.gz
+queue 1
+
+chrom            = chr22
+file1            = $(indir)/SCCS_AA_COPD_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file2            = $(indir)/SCCS_BC_CRC_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file3            = $(indir)/SCCS_BC_iCOGS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file4            = $(indir)/SCCS_BC_ROOT_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file5            = $(indir)/SCCS_CRC_GECCO_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file6            = $(indir)/SCCS_CRC_Hawaii_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file7            = $(indir)/SCCS_Lung_exoemchip_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file8            = $(indir)/SCCS_Lung_GWAS_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file9            = $(indir)/SCCS_pancreatic_cancer_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file10           = $(indir)/SCCS_prostate_control_Oncoarray_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file11           = $(indir)/SCCS_Prostate_USC_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+file12           = $(indir)/SCCS_Vitamin_D_MEGA_Build37_foward_keep_Shaneda_vd_vdbp_cancer_$(chrom).sample_filt.vcf.gz
+outfile          = $(outdir2)/SCCS_merged_vdbp_cancer_$(chrom).vcf.gz
+queue 1

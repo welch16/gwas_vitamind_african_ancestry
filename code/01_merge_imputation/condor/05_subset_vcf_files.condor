@@ -1,0 +1,22 @@
+# Program: 05_subset_vcf_files.condor
+# Author: Rene Welch
+# Created: 2020-09-01
+# Updated: 2020-09-15
+# Purpose: Wrapper to subset samples from vcf files with plink2 using condor
+
+universe         = vanilla
+executable       = /ua/rwelch/bin/plink2
+args             = --vcf $(vcf) --extract $(snps) --maf 0.05 --hwe 1e-6 --out $(out) --make-bed
+
+request_memory   = 10 GB
+on_exit_hold     = (ExitBySignal == True) || (ExitCode != 0)
+periodic_release = (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 180)
+outdir           = ./condor
+output           = $(outdir)/out/05_plink2_filter_vcf_by_chrom.$(cluster).$(process).out
+error            = $(outdir)/err/05_plink2_filter_vcf_by_chrom.$(cluster).$(process).err
+log              = $(outdir)/log/05_plink2_filter_vcf_by_chrom.$(cluster).$(process).log
+
+batch_name       = plink2_filter_vcf_files
+queue_file      = ./condor/queues/2020_09_15_subset_snps.csv
+
+queue vcf, snps, out from $(queue_file)

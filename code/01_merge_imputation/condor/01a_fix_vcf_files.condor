@@ -1,0 +1,22 @@
+# Program: 01a_fix_vcf_files.condor
+# Author: Rene Welch 
+# Created: 2020-09-01
+# Updated: 2020-09-11
+# Purpose: Condor wrapper to use `remove_bad_variants.sh`
+
+universe         = vanilla
+executable       = /usr/bin/bash
+args             = ./sh/remove_bad_variants.sh $(file)
+
+request_memory   = 16 GB
+on_exit_hold     = (ExitBySignal == True) || (ExitCode != 0)
+periodic_release = (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 180)
+outdir           = ./condor
+output           = $(outdir)/out/01a_remove_bad_variants.$(cluster).$(process).out
+error            = $(outdir)/err/01a_remove_bad_variants.$(cluster).$(process).err
+log              = $(outdir)/log/01a_remove_bad_variants.$(cluster).$(process).log
+
+batch_name       = remove_bad_variants
+filedir          = /z/Comp/uwcccseq/rwelch/WarrenAndersen_Shaneda/GWAS_colorecal_vitD/extracted_data/SCCS/imputation/vcf_by_chrom
+
+queue file matching ( $(filedir)/*vcf)

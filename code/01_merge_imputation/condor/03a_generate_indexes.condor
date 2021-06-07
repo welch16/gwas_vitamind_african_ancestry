@@ -1,0 +1,22 @@
+# Program: 03a_generate_indexes.condor
+# Author: Rene Welch
+# Created: 2020-09-01
+# Updated: 2020-09-11
+# Purpose: Wrapper to generate indexes for vcf files using condor
+
+universe         = vanilla
+executable       = /z/Comp/onglab/programs/bcftools/bin/bcftools
+args             = index $(file)
+
+request_memory   = 10 GB
+on_exit_hold     = (ExitBySignal == True) || (ExitCode != 0)
+periodic_release = (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 180)
+outdir           = ./condor
+output           = $(outdir)/out/03a_bcftools_index_vcf.$(cluster).$(process).out
+error            = $(outdir)/err/03a_bcftools_index_vcf.$(cluster).$(process).err
+log              = $(outdir)/log/03a_bcftools_index_vcf.$(cluster).$(process).log
+
+batch_name       = bcftools_index
+filedir          = /z/Comp/uwcccseq/rwelch/WarrenAndersen_Shaneda/GWAS_colorecal_vitD/extracted_data/SCCS/imputation/aux_impute
+
+queue file matching ( $(filedir)/*vcf.gz)

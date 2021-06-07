@@ -1,0 +1,22 @@
+# Program: 02_minimac4_impute_by_chrom.condor
+# Author: Rene Welch
+# Created: 2020-09-01
+# Updated: 2020-09-01
+# Purpose: Wrapper to impute cohort specific genotype data using minimac4 with condor
+
+universe         = vanilla
+executable       = /s/bin/minimac4
+args             = --refHaps $(panel) --haps $(vcf) --ignoreDuplicates --prefix $(out_impute)
+
+request_memory   = 10 GB
+on_exit_hold     = (ExitBySignal == True) || (ExitCode != 0)
+periodic_release = (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 180)
+outdir           = ./condor
+output           = $(outdir)/out/02_minimac4_impute_by_chrom.$(cluster).$(process).out
+error            = $(outdir)/err/02_minimac4_impute_by_chrom.$(cluster).$(process).err
+log              = $(outdir)/log/02_minimac4_impute_by_chrom.$(cluster).$(process).log
+
+queue_file       = ./condor/queues/2020_09_01_minimac4_impute.csv
+batch_name       = minimac4_impute
+
+queue vcf, panel, out_impute from $(queue_file)

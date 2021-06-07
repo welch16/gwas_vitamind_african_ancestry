@@ -1,0 +1,24 @@
+# Program: 06a_subset_ldprune_variants.condor
+# Author: Rene Welch
+# Created: 2020-09-01
+# Updated: 2020-09-15
+# Purpose: Wrapper to subset high LD variants with plink2 using condor
+
+universe         = vanilla
+batch_name       = plink2_ld_prune
+executable       = /ua/rwelch/bin/plink2
+args             = --threads 4 --bfile $(infile) --extract $(ld_in) --out $(out) --recode vcf
+
+request_memory   = 64 GB
+request_cpus     = 4
+on_exit_hold     = (ExitBySignal == True) || (ExitCode != 0)
+periodic_release = (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 180)
+outdir           = ./condor
+output           = $(outdir)/out/06a_plink2_subset_ld.$(cluster).$(process).out
+error            = $(outdir)/err/06a_plink2_subset_ld.$(cluster).$(process).err
+log              = $(outdir)/log/06a_plink2_subset_ld.$(cluster).$(process).log
+workdir          = /z/Comp/uwcccseq/rwelch/WarrenAndersen_Shaneda/GWAS_colorecal_vitD
+
+queue_file       = $(workdir)/results/2020_09_01_merge_impute_sccs/condor/queues/2020_09_15_pca_ldprune_subset.csv
+
+queue infile, ld_in, out from $(queue_file)

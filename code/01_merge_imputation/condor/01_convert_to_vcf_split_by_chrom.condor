@@ -1,0 +1,23 @@
+# Program: 01_convert_to_vcf_split_by_chrom.condor
+# Author: Rene Welch
+# Created: 2020-09-01
+# Updated: 2020-09-01
+# Purpose: Wrapper to split genotype files per chromosome and convert to vcf with plink2 using condor
+
+
+universe         = vanilla
+executable       = /ua/rwelch/bin/plink2
+args             = --bfile $(bfile) --export vcf --chr $(chrom) --out $(outfile) --geno 0.05
+
+request_memory   = 16 GB
+on_exit_hold     = (ExitBySignal == True) || (ExitCode != 0)
+periodic_release = (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 180)
+outdir           = ./condor
+output           = $(outdir)/out/01_plink2_filter_by_chrom$(chrom).$(cluster).$(process).out
+error            = $(outdir)/err/01_plink2_filter_by_chrom$(chrom).$(cluster).$(process).err
+log              = $(outdir)/log/01_plink2_filter_by_chrom$(chrom).$(cluster).$(process).log
+
+queue_file       = ./condor/queues/2020_09_01_vcf_by_chrom.csv
+batch_name       = plink2_filter_vcf
+
+queue bfile, chrom, outfile from $(queue_file)
