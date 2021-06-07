@@ -5,7 +5,6 @@ This repository contains the code utilized for the manuscript: _"Genome-wide ass
 The directory structure is:
 
 - `code/`
-- `results/`
 
 ---
 
