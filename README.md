@@ -4,9 +4,10 @@ This repository contains the code utilized for the manuscript: _"Genome-wide ass
 
 The directory structure is:
 
-- `01_merge_imputation/` - All manipulations to impute the different cohorts, and then join the imputed results to build a full genotype dataset.
-- `02_gwas_analysis/` - Data analysis presented in the manuscript
-- `03_functional_analysis/` - Manual figures of FUMA analysis.
+- `01_quality_control/` - QC manipulations to get a first dataset
+- `02_merge_imputation/` - All manipulations to impute the different cohorts, and then join the imputed results to build a full genotype dataset.
+- `03_gwas_analysis/` - Data analysis presented in the manuscript
+- `04_functional_analysis/` - Manual figures of FUMA analysis.
 
 ---
 
