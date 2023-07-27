@@ -1,13 +1,12 @@
-# SCCS Vitamin D Binding Protein Study
+# Genome-wide association study (GWAS) of circulating vitamin D outcomes among individuals of African ancestry
 
-This repository contains the code utilized for the manuscript: _"Genome-wide association study (GWAS) and functional analysis of genetic variants associated with circulating vitamin D binding protein in African Americans"_ (to be submitted)
+L Parlato, R Welch, IM Ong, J Long, L Cai, MD Steinwandel, WJ Blot, W Zheng, S Warren Andersen, _"Genome-wide association study (GWAS) of circulating vitamin D outcomes among individuals of African ancestry"_ (2023), The American Journal of Clinical Nutrition, 117-2, 308-316
 
 The directory structure is:
 
 - `01_quality_control/` - QC manipulations to get a first dataset
 - `02_merge_imputation/` - All manipulations to impute the different cohorts, and then join the imputed results to build a full genotype dataset.
 - `03_gwas_analysis/` - Data analysis presented in the manuscript
-- `04_functional_analysis/` - Manual figures of FUMA analysis.
 
 ---
 
