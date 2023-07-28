@@ -1,5 +1,8 @@
 # Genome-wide association study (GWAS) of circulating vitamin D outcomes among individuals of African ancestry
 
+[![DOI](https://zenodo.org/badge/373951249.svg)](https://zenodo.org/badge/latestdoi/373951249)
+
+
 L Parlato, R Welch, IM Ong, J Long, L Cai, MD Steinwandel, WJ Blot, W Zheng, S Warren Andersen, _"Genome-wide association study (GWAS) of circulating vitamin D outcomes among individuals of African ancestry"_ (2023), The American Journal of Clinical Nutrition, 117-2, 308-316
 
 The directory structure is:
