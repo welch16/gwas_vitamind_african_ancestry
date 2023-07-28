@@ -1,0 +1,20 @@
+
+universe         = vanilla
+executable       = /ua/rwelch/bin/plink2
+args             = --threads 4 --pfile $(infile) --out $(outdir2)/$(outpref) --memory 16000 --keep $(samples) --freq 
+
+request_memory   = 16 GB
+request_cpus     = 4
+on_exit_hold     = (ExitBySignal == True) || (ExitCode != 0)
+periodic_release = (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 180)
+outdir           = ./condor
+output           = $(outdir)/out/plink2_ukb_gwas_strat_$(chr)_$(pop).$(cluster).$(process).out
+error            = $(outdir)/err/plink2_ukb_gwas_strat_$(chr)_$(pop).$(cluster).$(process).err
+log              = $(outdir)/log/plink2_ukb_gwas_strat_$(chr)_$(pop).$(cluster).$(process).log
+workdir          = /z/Comp/uwcccseq/rwelch/WarrenAndersen_Shaneda/GWAS_colorecal_vitD
+
+queue_file       = ./condor/queues/2021_01-ukbiobank_gwas_queue_pops.csv
+outdir2          = $(workdir)/results/2021_01_06_ukbiobank_split_populations/maf
+batch_name       = ukbiobank_maf
+
+queue infile, samples, outpref, chr, pop from $(queue_file)

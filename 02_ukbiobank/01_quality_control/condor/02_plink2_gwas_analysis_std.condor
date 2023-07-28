@@ -1,0 +1,24 @@
+universe         = vanilla
+executable       = /ua/rwelch/bin/plink2
+args             = --threads 8 --pfile $(infile) --out $(outdir2)/$(outpref) --memory 256000 --keep $(samples) --pheno $(pheno) --glm hide-covar --covar $(covar) --covar-variance-standardize pc_1,pc_2,pc_3,pc_4,pc_5,pc_6,pc_7,pc_8,pc_9,pc_10,pc_11,pc_12,pc_13,pc_14,pc_15,pc_16,pc_17,pc_18,pc_19,pc_20
+
+request_memory   = 16 GB
+request_cpus     = 8
+on_exit_hold     = (ExitBySignal == True) || (ExitCode != 0)
+periodic_release = (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 180)
+outdir           = ./condor
+output           = $(outdir)/out/plink2_gwas_analysis_$(chr).$(cluster).$(process).out
+error            = $(outdir)/err/plink2_gwas_analysis_$(chr).$(cluster).$(process).err
+log              = $(outdir)/log/plink2_gwas_analysis_$(chr).$(cluster).$(process).log
+workdir          = /z/Comp/uwcccseq/rwelch/WarrenAndersen_Shaneda/GWAS_colorecal_vitD
+
+gwasdir          = $(workdir)/results/2020_06_08_gwas_analysis/plink2
+samples          = $(gwasdir)/gwas_samples.txt
+pheno            = $(gwasdir)/gwas_phenotype.txt
+covar            = $(gwasdir)/gwas_covariates.txt
+
+queue_file       = ./condor/2020_06-gwas_queue.csv
+outdir2          = $(workdir)/extracted_data/UKBiobank/plink2/vitd_std
+batch_name       = plink2_gwas_sqrt
+
+queue infile, outpref, chr from $(queue_file)

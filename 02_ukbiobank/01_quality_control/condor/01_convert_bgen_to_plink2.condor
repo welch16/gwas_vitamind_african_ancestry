@@ -1,0 +1,22 @@
+universe         = vanilla
+batch_name       = convert_plink2
+executable       = /ua/rwelch/bin/plink2
+args             = --threads 12 --bgen $(infile) --sample $(samples) --out $(out) --memory 256000 --make-pgen --keep $(keep_samples)
+
+
+request_memory   = 256 GB
+request_cpus     = 12
+on_exit_hold     = (ExitBySignal == True) || (ExitCode != 0)
+periodic_release = (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 180)
+outdir           = ./condor
+output           = $(outdir)/out/plink2_convert_$(chr).$(cluster).$(process).out
+error            = $(outdir)/err/plink2_convert_$(chr).$(cluster).$(process).err
+log              = $(outdir)/log/plink2_convert_$(chr).$(cluster).$(process).log
+workdir          = /z/Comp/uwcccseq/rwelch/WarrenAndersen_Shaneda/GWAS_colorecal_vitD
+
+samples          = $(workdir)/results/2020_05_04_compute_summary_stats/samples/colo_samples_to_keep.samples
+keep_samples     = $(workdir)/results/2020_06_08_gwas_analysis/plink2/gwas_samples.txt
+
+queue_file       = ./condor/2020_06-filter_queue.csv
+
+queue infile, out, chr from $(queue_file)

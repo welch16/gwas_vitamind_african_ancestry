@@ -1,0 +1,145 @@
+--- 
+title: "Genome-Wide Association Study of Hydroxy25-Vitamin D on stratified populations of the UKBiobank"
+author: "Rene Welch"
+output:
+  bookdown::html_document2:
+    toc: false
+    theme: spacelab
+    fig_caption: true
+    code_folding: hide
+---
+
+# Introduction
+
+Here I will document the different parameters and decisions made to analyze the data.
+
+```{r load-data, echo = FALSE, message = FALSE, warning = FALSE}
+
+knitr::opts_chunk$set( include = TRUE, eval = TRUE, cache = FALSE,
+  echo = TRUE, autodep = TRUE, fig.align = "center",
+  message = FALSE, warning = FALSE, fig.ext = "png",
+  fig.width = 6, fig.height = 4, out.width = 700)
+
+library(magrittr, quietly = TRUE)
+library(tidyverse, quietly = TRUE)
+library(cowplot, quietly = TRUE)
+library(qs, quietly = TRUE)
+library(ukbtools, quietly = TRUE)
+library(plotly, quietly = TRUE)
+
+theme_set(
+  theme_minimal() +
+    theme(
+      strip.background = element_blank(),
+      strip.text = element_text(colour = "navyblue", size = 12)))
+
+
+```
+
+## Stratified GWAS analysis {.tabset .tabset-fade}
+
+We fitted the model \@ref(eq:model) for the 3 populations by separate. The p.values in the analysis below correspond to testing $\mathcal{H}_0^{(g)}: \beta_g = 0$ for variant $g$.
+
+```{r load-gwas-results, include=FALSE, echo=FALSE, eval=TRUE}
+
+ukb_afroc_gwas <-
+  here::here("results/2022_08_04_ukbiobank_finemapping/qs",
+   "afroc_ukb_stats_filter.qs")
+
+folder <- "2021_07_01_ukbiobank_stratified_gwas"
+
+ukb_afroc_genes <-
+  here::here("results", folder, "qs/ukb_afroc_annot_snps.qs")
+
+lambda_inflation <- function(data, zvar) {
+
+  zvar <- rlang::enquo(zvar)
+  chisq <- data %>%
+    dplyr::pull(!! zvar)
+  chisq <- chisq^2
+  median(chisq)/qchisq(0.5, 1)
+
+}
+
+
+ukb_afroc_gwas %<>% qs::qread()
+ukb_afroc_genes %<>% qs::qread()
+
+
+prepare_labels <- function(gwas, genes) {
+
+  gwas %<>%
+    dplyr::filter(p <= 5e-8)
+
+
+  genes %>%
+    right_join(gwas, by = "id") %>%
+    tidyr::unnest(cols = c(genes)) %>%
+    group_by(chr) %>%
+    top_n(10, -log10(p))
+
+
+}
+
+
+```
+
+
+### Afrocaribbean {-#afrocaribbean}
+
+```{r ukb-afroc-manhattan, include = TRUE, echo = FALSE, eval = TRUE, fig.width = 9, fig.height = 3.5, out.width = "100%", cache = TRUE}
+
+ids <- ukb_afroc_gwas %>%
+  dplyr::filter(p <= 5e-8) %>%
+  dplyr::group_by(chrom) %>%
+  dplyr::top_n(1, wt = -p) %>%
+  dplyr::mutate(symbol = "GC") %>%
+  dplyr::top_n(1, wt = -p) %>%
+  dplyr::select(symbol, chrom, pos)
+
+library(ggrepel)
+
+ukb_afroc_gwas %>%
+  UWCCC.GWAS::manhattan_plot(sig = 5e-8, sig_color = "black",
+    label_data = ids, label_var = symbol) +
+  labs(
+    x = NULL,
+    y = expression(-log[10](p))) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    panel.border = element_blank(),
+    axis.ticks.x = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 14),
+    axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+
+```
+
+```{r ukb-afroc-qqplot, include = TRUE, echo = FALSE, eval = TRUE, fig.width = 4.5, fig.height = 4.5, out.width = "50%", cache = TRUE}
+
+ukb_afroc_gwas %>%
+  UWCCC.GWAS::qqplot_pvalue() +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  theme(
+    legend.position = "none",
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 14))
+
+```
+
+`r ukb_afroc_gwas %>% lambda_inflation(t_stat)`
+
+
+```{r snps, include=TRUE, echo=FALSE, eval=TRUE}
+
+ukb_afroc_gwas %>%
+  dplyr::filter(p <=  5e-8) %>%
+  dplyr::mutate(symbol = "GC") %>%
+  knitr::kable()
+
+```

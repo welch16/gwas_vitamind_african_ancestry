@@ -1,0 +1,24 @@
+universe         = vanilla
+executable       = /ua/rwelch/bin/plink2
+args             = --threads 12 --pfile $(infile) --out $(outdir2)/$(outpref) --memory 16000 --keep $(samples) --pheno $(pheno) --glm hide-covar --covar $(covar)
+
+request_memory   = 16 GB
+request_cpus     = 12
+on_exit_hold     = (ExitBySignal == True) || (ExitCode != 0)
+periodic_release = (NumJobStarts < 3) && ((CurrentTime - EnteredCurrentStatus) > 180)
+outdir           = ./condor
+output           = $(outdir)/out/plink2_gwas_vitd_nopca_$(chr).$(cluster).$(process).out
+error            = $(outdir)/err/plink2_gwas_vitd_nopca_$(chr).$(cluster).$(process).err
+log              = $(outdir)/log/plink2_gwas_vitd_nopca_$(chr).$(cluster).$(process).log
+workdir          = /z/Comp/uwcccseq/rwelch/WarrenAndersen_Shaneda/GWAS_colorecal_vitD
+
+gwasdir          = $(workdir)/results/2020_06_08_gwas_analysis/plink2
+samples          = $(gwasdir)/gwas_samples.txt
+pheno            = $(gwasdir)/gwas_pheno_vitd.txt
+covar            = $(gwasdir)/gwas_cov_no_pca.txt
+
+queue_file       = ./condor/2020_06-gwas_queue.csv
+outdir2          = $(workdir)/extracted_data/UKBiobank/gwas_results/vitd/no_pca
+batch_name       = gwas_vitd_nopca
+
+queue infile, outpref, chr from $(queue_file)

@@ -1,0 +1,20 @@
+universe         = vanilla
+batch_name       = plink2_strat_gwas
+executable       = /ua/rwelch/bin/plink2
+args             = --threads 12 --bgen $(bgenfile) ref-first --sample $(samplefile) --out $(outfile) --memory 16000 --keep $(keepfile) --freq --missing --hardy
+
+
+request_memory   = 256 GB
+request_cpus     = 12
+on_exit_hold     = (ExitBySignal == True) || (ExitCode != 0)
+periodic_release = (NumJobStarts < 5) && ((CurrentTime - EnteredCurrentStatus) > 300)
+outdir           = ./condor
+output           = $(outdir)/out/plink2_summary_stats.$(cluster).$(process).out
+error            = $(outdir)/err/plink2_summary_stats.$(cluster).$(process).err
+log              = $(outdir)/log/plink2_summary_stats.$(cluster).$(process).log
+workdir          = /z/Comp/uwcccseq/rwelch/WarrenAndersen_Shaneda/GWAS_colorecal_vitD
+
+samplefile       = $(workdir)/raw_data/UKBiobank/2020_02/genotype/ukb35256_imp_chr1_v3_s487253.sample
+queue_file       = $(workdir)/results/2021_07_01_ukbiobank_stratified_gwas/condor/gwas/ukb_gwas_queue.csv
+
+queue bgenfile, keepfile, outfile from $(queue_file)

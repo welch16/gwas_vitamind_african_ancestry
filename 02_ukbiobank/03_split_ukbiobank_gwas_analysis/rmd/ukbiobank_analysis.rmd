@@ -1,0 +1,540 @@
+--- 
+title: "Genome-Wide Association Study of Hydroxy25-Vitamin D on stratified populations of the UKBiobank"
+author: "Rene Welch"
+bibliography: colo.bib
+output:
+  bookdown::html_document2:
+    toc: false
+    theme: spacelab
+    fig_caption: true
+    code_folding: hide
+---
+
+# Introduction
+
+Here I will document the different parameters and decisions made to analyze the data.
+
+```{r load-data, echo = FALSE, message = FALSE, warning = FALSE}
+
+knitr::opts_chunk$set( include = TRUE, eval = TRUE, cache = FALSE,
+  echo = TRUE, autodep = TRUE, fig.align = "center",
+  message = FALSE, warning = FALSE, fig.ext = "png",
+  fig.width = 6, fig.height = 4, out.width = 700)
+
+library(magrittr, quietly = TRUE)
+library(tidyverse, quietly = TRUE)
+library(cowplot, quietly = TRUE)
+library(qs, quietly = TRUE)
+library(ukbtools, quietly = TRUE)
+library(plotly, quietly = TRUE)
+
+folder <- "2021_07_01_ukbiobank_stratified_gwas"
+data_dir <- here::here("results", folder, "qs")
+uk_data <- file.path(data_dir, "ukbiobank_grant_vars.qs") %>%
+  qs::qread()
+princomp <- file.path(data_dir, "ukbiobank_princomp.qs") %>%
+  qs::qread()
+  
+princomp %<>%
+  dplyr::mutate(
+    eid = stringr::str_split(iid, "\\_") %>%
+      purrr::map_chr(1) %>%
+      as.integer()) %>%
+  dplyr::select(-iid)
+  
+uk_data %<>%
+  dplyr::inner_join(princomp, by = "eid")
+
+theme_set(
+  theme_minimal() +
+    theme(
+      strip.background = element_blank(),
+      strip.text = element_text(colour = "navyblue", size = 12)))
+
+
+```
+
+# Methods
+
+## Sample selection
+
+Our population is composed by all subjects in the UKBiobank dataset at date 2021-08.
+
+## Genotype quality control
+
+@Revez2020-dd used the following parameters:
+
+- HWE p.value $\leq$ 1e-5
+- MAF $\geq$ 0.01
+- Imputation score $\geq$ 0.3
+- Genotype missing rate $\leq$ 0.05
+
+The parameters in the grant are:
+
+- HWE p.value $\leq$ 1e-6
+- MAF $\geq$ 0.05
+- Imputation score $\geq$ 0.3
+- Genotype missing rate $\leq$ 0.05
+
+In principle, with the UKBiobank full cohort it is possible to use less restrictive tuning parameters. However, we may need to use more restrictive paramters because we are stratifying the UKBiobank cohort by ethnicity, and every population except European / British has < 10K individuals. 
+
+# Command instructions
+
+## Download data
+
+This is being done using the [UKBiobank utilities](https://biobank.ndph.ox.ac.uk/showcase/download.cgi), in particular to get the genotype data we need to utilize the `ukbgene` program. For example to download the data for chromosome 1:
+
+```sh
+## to download the snp data
+ukbgene cal -ak35256r40833.key -c1
+## to download sample data
+ukbgene imp -m -ak35256r40833.key -c1
+## to download the imputed genotype data
+ukbgene imp -ak35256r40833.key -c1
+```
+
+## Summary statistics
+
+The next step is to compute the summary statistics. In the previous analysis we filtered the variants that didn't satisfy the different threshold defined in the [Genotype quality control section](#genotype-quality-control), and therefore we missed the summary statistics for many variants reported by @Revez2020-dd. In this run, we are going to pre-filter the variants when computing the principal components and stratify the data, but we are going to perform the GWAS model for every variant.
+
+We utilzied [QCTOOL](https://www.well.ox.ac.uk/~gav/qctool_v2/) to compute the summary statistics for every variant. In particular, this program compute the HWE p.values by using the method propossed by @Wigginton2005-hf.
+
+## Principal component analysis
+
+To calculate the principal components, we pre-filtered the variants using the thresholds:
+
+- MAF $\geq$ 0.01
+- HWE p.value $\leq$ 1e-5
+- Genotype missing rate $\leq$ 0.05
+
+Then, we prunned the variants with a LD correlation $\geq$ 0.1, and apply the PCA `--approx` algorithm by @Galinsky2016-nq to compute the top 20 principal components.
+
+### Data stratification
+
+We stratified the populations by ethnicity:
+
+- Afrocaribbean: African, Caribbean, any other black background, Black or Black british
+- Asian: Chinese, Indian, Pakistani, Bangladeshi, any other asian background, Asian or Asian british
+- White: British, Irish, white, any other white background
+
+## GWAS analysis
+
+We modeled the association between Hydroxy25-Vitamin D and genotypes by using the top 20 principal components standarized to have unit variance, the BMI levels, sex and age as adjustment variables and log transforming the vitamin D phenotype:
+
+\begin{equation}
+\log(\text{Vit D}) = \mu + g^T\beta_g + \text{sex} \cdot \beta_\text{sex} + \text{age} \cdot \beta_\text{age} + \text{bmi} \cdot \beta_\text{bmi} + \sum_{k=1}^{20} \text{pc}_k \cdot\beta_{\text{pc}_k} + \epsilon (\#eq:model)
+\end{equation}
+
+where:
+
+- $(\text{Vit D})$ are the Hydroxy25-Vitamin D levels in the blood
+- $\mu$ is the overall mean of the log-response
+- $g$ and $\beta_g$ are the number of copies of the minor allele for a variant and its estimated effect
+- $\epsilon \sim N(0,\sigma^2)$ is the error
+
+## Fine-mapping
+
+## Functional annotation
+
+# Results
+
+## Principal component analysis and stratification {.tabset .tabset-fade}
+
+I made two versions of every scatter plot: with and without the `british` ethnicity label. I think that without those samples, it is going to be easier to see the separations in ethnicity.
+
+However, it seems that we are going to statify the population by:
+
+```{r sample-sizes, include=FALSE, echo=FALSE, eval=TRUE}
+
+afrocaribbean <- uk_data %>%
+  dplyr::filter(pop == "afrocaribbean") %>%
+    nrow()
+asian <- uk_data %>%
+  dplyr::filter(pop == "asian") %>%
+    nrow()
+white <- uk_data %>%
+  dplyr::filter(pop == "white") %>%
+  nrow()
+
+```
+
+1. Afrocaribbean (`r scales::comma(afrocaribbean)`): African, Caribbean, any other black background, Black or Black british
+2. Asian (`r scales::comma(asian)`): Chinese, Indian, Pakistani, Bangladeshi, any other asian background, Asian or Asian british
+3. White (`r scales::comma(white)`): British, Irish, white, any other white background
+
+Besides those groups, it is possible to divide the "white and ..." categories by quantifying the distance from that individual to the other categories and try to increase the sample sizes.
+
+The figure below shows the number of individuals per ethnicity label except the most abundant "British" one.
+
+```{r ethnicity-counts, include=TRUE, echo=FALSE, eval=TRUE, fig.width=7, fig.height=5, out.width="75%"}
+
+uk_data %>%
+  dplyr::count(ethnicity) %>%
+  dplyr::filter(ethnicity != "british") %>%
+  dplyr::mutate(
+    ethnicity = forcats::fct_reorder(ethnicity, n),
+    ethnicity = forcats::fct_explicit_na(ethnicity, "unlabeled")) %>%
+  ggplot(aes(x = n, y = ethnicity)) +
+    geom_col(fill = "white", colour = "navyblue") +
+    geom_text(aes(label = n), hjust = 1, colour = "red", size = 3) +
+    labs(x = "# of individuals")
+
+```
+
+```{r pca-viz-funs, include=FALSE, echo=FALSE, eval=TRUE, cache = TRUE}
+
+my_scatter <- function(data, mapping, remove_british = FALSE){
+
+  data %<>%
+    dplyr::mutate(ethnicity = as.character(ethnicity)) %>%
+    dplyr::filter(!is.na(ethnicity)) %>%
+    dplyr::filter(ethnicity != "do not know") %>%
+    dplyr::filter(ethnicity != "prefer not to answer")
+
+  col_vals <- unique(data$ethnicity)
+  cols <- Polychrome::green.armytage.colors(length(col_vals)) %>%
+    set_names(col_vals)
+
+  if (remove_british) {
+    data %<>%
+      dplyr::filter(ethnicity != "british")
+  }
+
+  plot <- ggplot(data = data, mapping = mapping)
+  
+  if (!remove_british) {
+    plot <- plot +
+      geom_point(alpha = 1 / 5)
+  } else {
+    plot <- plot +
+      geom_point()  
+  }
+  
+  plot + 
+    geom_rug() +
+    scale_color_manual(values = cols) +
+    guides(colour = ggplot2::guide_legend(ncol = 1)) +
+    theme(
+      axis.title = element_text(size = 20),
+      legend.text = element_text(size = 16),
+      axis.text = element_text(size = 16))
+}
+
+```
+
+We can't compute the variance explained exactly because we are only computing the top 20 principal components, and it would be too expensive to calculate all. This figure indicates that as expected most of the variance explained comes from the top 5 or top 10 principal components.
+
+```{r var-explained, include=TRUE, echo=FALSE, eval=TRUE, fig.width=4, fig.height=3,out.width="50%"}
+
+eigval <- readr::read_csv(
+  here::here("results/2021_07_01_ukbiobank_stratified_gwas",
+    "plink2/ukbiobank_pca.eigenval"), col_names = "eigval")
+
+eigval %>%
+  dplyr::mutate(id = row_number()) %>%
+  ggplot(aes(id, eigval)) + geom_point(colour = "orange", size = 1.2) +
+  geom_line(colour = "orange") +
+  labs(x = "component id", y = "eigvalue")
+
+```
+
+### PC1 vs PC2 {-#pc1-vs-pc2}
+
+```{r pc1-vs-pc2, include=TRUE, echo=FALSE, eval=TRUE, fig.width=7, fig.height=7, out.width="100%", cache = TRUE, dependson="pca-viz-funs"}
+
+my_scatter(uk_data, aes(pc_1, pc_2, colour = ethnicity)) +
+  theme(legend.position = "none")
+
+my_scatter(uk_data, aes(pc_1, pc_2, colour = ethnicity), TRUE)
+
+```
+
+
+```{r legend, include=TRUE, echo=FALSE, eval=TRUE, fig.width=4, fig.height=7, out.width="50%"}
+
+pp <- my_scatter(uk_data, aes(pc_1, pc_2, colour = ethnicity)) +
+  theme(legend.position = "none")
+
+lgd <- cowplot::get_legend(pp + theme(legend.position = "right"))
+
+cowplot::plot_grid(lgd, nrow = 1)
+
+
+```
+
+
+### PC1 vs PC3 {-#pc1-vs-pc3}
+
+```{r pc1-vs-pc3, include=TRUE, echo=FALSE, eval=TRUE, fig.width=7, fig.height=7, out.width="100%", cache = TRUE, dependson="pca-viz-funs"}
+
+my_scatter(uk_data, aes(pc_1, pc_3, colour = ethnicity)) +
+  theme(legend.position = "none")
+my_scatter(uk_data, aes(pc_1, pc_3, colour = ethnicity), TRUE)
+
+```
+
+### PC1 vs PC4 {-#pc1-vs-pc4}
+
+```{r pc1-vs-pc4, include=TRUE, echo=FALSE, eval=TRUE, fig.width=7, fig.height=7, out.width="100%", cache = TRUE, dependson="pca-viz-funs"}
+
+my_scatter(uk_data, aes(pc_1, pc_4, colour = ethnicity)) +
+  theme(legend.position = "none")
+my_scatter(uk_data, aes(pc_1, pc_4, colour = ethnicity), TRUE)
+
+
+```
+
+### PC2 vs PC3 {-#pc2-vs-pc3}
+
+```{r pc2-vs-pc3, include=TRUE, echo=FALSE, eval=TRUE, fig.width=7, fig.height=7, out.width="100%", cache = TRUE, dependson="pca-viz-funs"}
+
+my_scatter(uk_data, aes(pc_2, pc_3, colour = ethnicity)) +
+  theme(legend.position = "none")
+my_scatter(uk_data, aes(pc_2, pc_3, colour = ethnicity), TRUE)
+
+```
+
+### PC2 vs PC4 {-#pc2-vs-pc4}
+
+```{r pc2-vs-pc4, include=TRUE, echo=FALSE, eval=TRUE, fig.width=7, fig.height=7, out.width="100%", cache = TRUE, dependson="pca-viz-funs"}
+
+my_scatter(uk_data, aes(pc_2, pc_4, colour = ethnicity)) +
+  theme(legend.position = "none")
+my_scatter(uk_data, aes(pc_2, pc_4, colour = ethnicity), TRUE)
+
+```
+
+### PC3 vs PC4 {-#pc3-vs-pc4}
+
+```{r pc3-vs-pc4, include=TRUE, echo=FALSE, eval=TRUE, fig.width=7, fig.height=7, out.width="100%", cache = TRUE, dependson="pca-viz-funs"}
+
+my_scatter(uk_data, aes(pc_3, pc_4, colour = ethnicity)) +
+  theme(legend.position = "none")
+my_scatter(uk_data, aes(pc_3, pc_4, colour = ethnicity), TRUE)
+
+```
+
+
+
+## Stratified exploratory analysis {.tabset .tabset-fade}
+
+We are going to divide and compare the different covariates for each of the three different strata.
+
+```{r supp-table-sccs, include = TRUE, echo = FALSE, eval = TRUE, cache=TRUE}
+
+uk_data %>%
+  dplyr::filter(pop != "other") %>%
+  dplyr::filter(!is.na(vitamin_d)) %>%
+  dplyr::select(age, age_bin, sex, educ_agg, household_income, pop,
+    bmi, bmi_obese, smoking_status, alcohol_intake, ends_with("phys_act")) %>%
+  gtsummary::tbl_summary(by = pop)
+
+```
+
+## Stratified GWAS analysis {.tabset .tabset-fade}
+
+We fitted the model \@ref(eq:model) for the 3 populations by separate. The p.values in the analysis below correspond to testing $\mathcal{H}_0^{(g)}: \beta_g = 0$ for variant $g$.
+
+```{r load-gwas-results, include=FALSE, echo=FALSE, eval=TRUE}
+
+ukb_afroc_gwas <-
+  here::here("results", folder, "plink2/ukb_gwas_filtered_afrocaribbean.qs")
+ukb_asian_gwas <-
+  here::here("results", folder, "plink2/ukb_gwas_filtered_asian.qs")
+ukb_white_gwas <-
+  here::here("results", folder, "plink2/ukb_gwas_filtered_white.qs")
+
+ukb_afroc_genes <-
+  here::here("results", folder, "qs/ukb_afroc_annot_snps.qs")
+ukb_asian_genes <-
+  here::here("results", folder, "qs/ukb_asian_annot_snps.qs")
+ukb_white_genes <-
+  here::here("results", folder, "qs/ukb_white_annot_snps.qs")
+
+lambda_inflation <- function(data, zvar) {
+
+  zvar <- rlang::enquo(zvar)
+  chisq <- data %>%
+    dplyr::pull(!! zvar)
+  chisq <- chisq^2
+  median(chisq)/qchisq(0.5, 1)
+
+}
+
+
+ukb_afroc_gwas %<>% qs::qread()
+ukb_afroc_genes %<>% qs::qread()
+
+ukb_asian_gwas %<>% qs::qread()
+ukb_asian_genes %<>% qs::qread()
+
+ukb_white_gwas %<>% qs::qread()
+ukb_white_genes %<>% qs::qread()
+
+prepare_labels <- function(gwas, genes) {
+
+  gwas %<>%
+    dplyr::filter(p <= 5e-8)
+
+
+  genes %>%
+    right_join(gwas, by = "id") %>%
+    tidyr::unnest(cols = c(genes)) %>%
+    group_by(chr) %>%
+    top_n(10, -log10(p))
+
+
+}
+
+
+```
+
+For the figures below, we are only using the variants that satisfy the thresholds of section 3.3, but we computed the summary statistics for all the variants in the dataset.
+
+The table below shows the number of significant variants that satisfy the QC thresholds according to multiple p.value thresholds:
+
+```{r sign-vars-per-pop, include=TRUE, echo=FALSE, eval=TRUE, cache = TRUE}
+
+pval_thr <- sort(c(1e-8, 5e-8, 1e-6, 5e-6))
+
+count_thr <- function(pval_thr, ukb_gwas) {
+
+  ukb_gwas %>%
+    dplyr::mutate(pval_thr) %>%
+    dplyr::filter(p <= pval_thr) %>%
+    dplyr::count(pval_thr, pop)
+
+}
+
+bind_rows(
+  map(pval_thr, count_thr, ukb_afroc_gwas),
+  map(pval_thr, count_thr, ukb_asian_gwas),
+  map(pval_thr, count_thr, ukb_white_gwas)) %>%
+mutate(`p.value` = scales::scientific(pval_thr, 1)) %>%
+tidyr::pivot_wider(names_from = pop, values_from = n) %>%
+arrange(pval_thr) %>%
+select(-pval_thr) %>%
+knitr::kable()
+
+```
+
+
+### Afrocaribbean {-#afrocaribbean}
+
+```{r ukb-afroc-manhattan, include = TRUE, echo = FALSE, eval = TRUE, fig.width = 9, fig.height = 3.5, out.width = "100%", cache = TRUE}
+
+ids <- prepare_labels(ukb_afroc_gwas, ukb_afroc_genes) %>%
+  dplyr::filter(symbol != "XXYLT1") %>%
+  dplyr::mutate(symbol = "GC") %>%
+  dplyr::top_n(1, wt = -p) %>%
+  dplyr::select(symbol, chr, pop, chrom, pos)
+
+library(ggrepel)
+
+ukb_afroc_gwas %>%
+  UWCCC.GWAS::manhattan_plot(sig = 5e-8, sig_color = "black",
+    label_data = ids, label_var = symbol) +
+  labs(
+    x = NULL,
+    y = expression(-log[10](p))) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    panel.border = element_blank(),
+    axis.ticks.x = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 14),
+    axis.text.x = element_text(angle = 90, vjust = 0.5))
+
+```
+
+```{r ukb-afroc-qqplot, include = TRUE, echo = FALSE, eval = TRUE, fig.width = 4.5, fig.height = 4.5, out.width = "50%", cache = TRUE}
+
+ukb_afroc_gwas %>%
+  UWCCC.GWAS::qqplot_pvalue() +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  theme(
+    legend.position = "none",
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 14))
+
+```
+
+`r ukb_afroc_gwas %>% lambda_inflation(t_stat)`
+
+### Asian {-#asian}
+
+```{r ukb-asian-manhattan, include = TRUE, echo = FALSE, eval = TRUE, fig.width = 12, fig.height = 4.5, out.width = "100%", cache = TRUE}
+
+ids <- prepare_labels(ukb_asian_gwas, ukb_asian_genes)
+
+ukb_asian_gwas %>%
+  UWCCC.GWAS::manhattan_plot(sig = 5e-8, sig_color = "red") +
+  labs(
+    x = NULL,
+    y = expression(-log[10](p))) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    panel.border = element_blank(),
+    axis.ticks.x = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    axis.text.x = element_text(angle = 90, size = 8, vjust = 0.5))
+
+```
+
+```{r ukb-asian-qqplot, include = TRUE, echo = FALSE, eval = TRUE, fig.width = 4.5, fig.height = 4.5, out.width = "50%", cache = TRUE}
+
+ukb_asian_gwas %>%
+  UWCCC.GWAS::qqplot_pvalue() +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+### white {-#white}
+
+```{r ukb-white-manhattan, include = TRUE, echo = FALSE, eval = TRUE, fig.width = 12, fig.height = 4.5, out.width = "100%", cache = TRUE}
+
+ids <- prepare_labels(ukb_white_gwas, ukb_white_genes)
+
+
+ukb_white_gwas %>%
+  UWCCC.GWAS::manhattan_plot(sig = 5e-8, sig_color = "red") +
+  labs(
+    x = NULL,
+    y = expression(-log[10](p))) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    panel.border = element_blank(),
+    axis.ticks.x = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    axis.text.x = element_text(angle = 90, size = 8, vjust = 0.5))
+
+```
+
+```{r ukb-white-qqplot, include = TRUE, echo = FALSE, eval = TRUE, fig.width = 4.5, fig.height = 4.5, out.width = "50%", cache = TRUE}
+
+ukb_white_gwas %>%
+  UWCCC.GWAS::qqplot_pvalue() +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+```
+
+
+# Session info
+
+```{r si, include=TRUE,echo=FALSE,eval=TRUE}
+
+sessioninfo::session_info()
+
+```
+
+# Bibliography
