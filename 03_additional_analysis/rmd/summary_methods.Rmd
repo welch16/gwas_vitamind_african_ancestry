@@ -1,0 +1,431 @@
+--- 
+title: "Genome-Wide Association Study of Vitamin D and Vitamin D Binding Protein in Individuals of African Descent"
+subtitle: "Methods - updated 2020-06-10" 
+author: "Rene Welch"
+bibliography: colo.bib
+output:
+  bookdown::html_document2:
+    theme: spacelab
+    fig_caption: true
+    code_folding: hide
+---
+
+```{r setup, echo = FALSE, message = FALSE, warning = FALSE, cache = FALSE}
+
+knitr::opts_chunk$set( include = TRUE, eval = TRUE, cache = TRUE,
+  echo = TRUE, autodep = TRUE, fig.align = "center",
+  message = FALSE, warning = FALSE, fig.ext = "png")
+
+pacman::p_load(
+  magrittr,
+  tidyverse,
+  cowplot,
+  qs,
+  rlang)
+
+colo_cohort <- qs::qread(
+  here::here("results",
+    "2020_06_08_gwas_analysis",
+    "qs",
+    "ukbiobank_colorectal_cancer_2020_03_02.qs"))
+
+nsamples <- colo_cohort %>%
+  count(colorectal)
+
+theme_set(theme_bw())
+
+cases_meaning <- qs::qread(
+  here::here("results",
+  "2020_06_08_gwas_analysis",
+  "qs",
+  "cases_meaning.qs"))
+
+pca_results <- here::here("results",
+  "2020_05_29_principal_component_analysis", "qs",
+  "pca_results_plink2.qs") %>% qs::qread()
+
+pca_results[["vectors"]] %<>%
+  inner_join(colo_cohort, by = c(id = "eid")) %>%
+  mutate(ethnicity = fct_explicit_na(ethnicity, "not-available"))
+
+
+pca_results[["values"]] %<>%
+  rename(eig_values = X1) %>%
+  mutate(id = row_number())
+
+```
+
+# UKBiobank analysis
+
+This is a general summary of the data processing of the UKBiobank dataset, and the mehtods applied to analyze the dataset.
+
+## Cohort selection
+
+The UKBiobank dataset had 502,506 samples at the moment we received it. Since there is a lot of descriptive data on the samples, we decided to filter the samples to include either individuals with rectal cancer as cases, and without any cancer as controls. Out of these individuals, we kept the ones that had the [Vitamin D](http://biobank.ndph.ox.ac.uk/showcase/field.cgi?id=30890) entry not missing.  This process yielded a datasets with `r scales::comma(sum(nsamples$n), 1)` samples (`r scales::comma(nsamples$n[1], 1)` controls and `r scales::comma(nsamples$n[2], 1)` cases).
+
+- Controls: No cancer in the self-reported column, and no-cancer in the EHR variable
+- Cases: Either self-reported colorectal cancer, or the following codes in EHR records:
+
+```{r cases_meaning, cache = FALSE, echo = FALSE}
+cases_meaning %>%
+  knitr::kable()
+```
+
+Among the remaining samples, there is a bit of missing information:
+
+```{r missing-data, echo = FALSE}
+
+colo_cohort %>%
+  as.list() %>%
+  purrr::map_int( ~ sum(is.na(.))) %>%
+  tibble::as_tibble(rownames = "variable") %>%
+  dplyr::filter(value > 0) %>%
+  pivot_wider(names_from = variable, values_from = value) %>%
+  knitr::kable()
+
+```
+
+## Variable distribution {.tabset .tabset-fade}
+
+I tried to recover as closely as possible the adjustment variables in the Project Update document, but there is not an exact match between variables.
+
+- Age: I defined it as `year(date_center) - birth_year`. Where the `date_center` is the date where their data was collected
+- Family history: I defined it as `yes` if any of `father_history`, `mother_history` or `sibblings_history` was positive, and as `no` if all of those variables were negative
+- Education: [Here is the coding key.](https://biobank.ndph.ox.ac.uk/showcase/coding.cgi?id=100305), what would be highschool level in the UK?
+- Household income: If is defined in [pounds](https://biobank.ndph.ox.ac.uk/showcase/coding.cgi?id=100294), so we need to adapt this variable a little bit and make the income bins comparable by adquisitive power
+- Alcohol intake: [Here is the coding key](https://biobank.ndph.ox.ac.uk/showcase/coding.cgi?id=100402), non and moderate would be values 4-6 or 3-6?
+- Physical activity variables: These two variables were defined already in terms of deciles, and aggregated: [moderated](https://biobank.ndph.ox.ac.uk/showcase/field.cgi?id=884) and [vigorous](https://biobank.ndph.ox.ac.uk/showcase/field.cgi?id=904). For these two variables, I grouped the levels to be $\leq 4 \sim $ `no`, and $\geq 5 \sim$ `yes`.
+- Insurance: I am pretty sure that the insurance is public option in the UK, so I think we should ignore that variable
+- Ethnicity: Most of the people were defined as british (`id = 1001`)
+
+Besides, I groupped the `do not know`, `prefer not to answer` and `NA` as `missing` in most of the variables.
+
+```{r sfuns, echo = FALSE, cache = TRUE}
+
+distr_comp <- function(.data, var, nbins = 31) {
+
+  var <- rlang::enquo(var)
+
+  .data %>%
+    ggplot2::ggplot( ggplot2::aes( x = !!var, fill = colorectal)) +
+    ggplot2::geom_histogram(
+      bins = nbins, position = "dodge", colour = "black") +
+    ggplot2::scale_fill_brewer(palette = "Pastel1") +
+    ggplot2::theme(
+      legend.position = "top",
+      strip.background = element_blank()) +
+    ggplot2::facet_grid(colorectal ~ ., scales = "free_y") +
+    ggplot2::scale_y_continuous(labels = scales::comma_format(1))
+
+}
+
+discr_comp <- function(.data, var) {
+  var <- rlang::enquo(var)
+  var_name <- rlang::quo_name(var)
+  .data %<>%
+    mutate(
+      !! var_name := factor(!! var))
+
+  .data %>%
+    ggplot2::ggplot(ggplot2::aes( !! var, fill = colorectal)) +
+    ggplot2::geom_bar(position = "dodge", colour = "black") +
+    ggplot2::scale_fill_brewer(palette = "Pastel1") +
+    ggplot2::theme(
+      legend.position = "top",
+      strip.background = element_blank()) +
+    ggplot2::facet_grid(colorectal ~ ., scales = "free_y") +
+    ggplot2::scale_y_continuous(labels = scales::comma_format(1))
+
+}
+
+```
+
+### Vitamin D {-#vitamin-d}
+
+```{r vit-d, echo = FALSE, cache = TRUE, dependson = "sfuns"}
+
+distr_comp(colo_cohort, vitamin_d, 21) + xlim(0, 150)
+
+```
+
+### log Vitamin D {-#log-vitamin-d}
+
+```{r logvit-d, echo = FALSE, cache = TRUE, dependson = "sfuns"}
+
+distr_comp(colo_cohort, log(vitamin_d), 21)
+
+```
+
+### sqrt Vitamin D {-#sqrt-vitamin-d}
+
+```{r sqrt-vit-d, echo = FALSE, cache = TRUE, dependson = "sfuns"}
+
+distr_comp(colo_cohort, sqrt(vitamin_d), 21) + xlim(0, 15)
+
+```
+
+
+
+### Age {-#age}
+
+```{r age, echo = FALSE, cache = TRUE, dependson = "sfuns"}
+
+distr_comp(colo_cohort, age, 21)
+
+```
+
+### Age-bin {-#age-bin}
+
+```{r age_bin, echo = FALSE, cache = TRUE, dependson = "sfuns"}
+
+discr_comp(colo_cohort, age_bin)
+
+```
+
+### Age recruitment {-#age-recruitment}
+
+```{r age_r, echo = FALSE, cache = TRUE, dependson = "sfuns"}
+
+distr_comp(colo_cohort, age_recrui, 21)
+
+```
+
+### Sex {-#sex}
+
+```{r sex, echo = FALSE, cache = TRUE, dependson = "sfuns"}
+
+discr_comp(colo_cohort, sex)
+
+```
+
+### Education {-#education}
+
+```{r educ, echo = FALSE, cache = TRUE, dependson = "sfuns"}
+
+discr_comp(colo_cohort, educ) +
+  theme(axis.text.x = element_text(angle = 35, hjust = 1))
+
+
+```
+
+### Education aggr {-#education-aggr}
+
+```{r educ_agg, echo = FALSE, cache = TRUE, dependson = "sfuns"}
+
+discr_comp(colo_cohort, educ_agg) +
+  theme(axis.text.x = element_text(angle = 35, hjust = 1))
+
+```
+
+### Household income {-#household-income}
+
+```{r income, echo = FALSE, cache = TRUE, dependson = "sfuns"}
+
+discr_comp(colo_cohort, household_income) +
+  theme(axis.text.x = element_text(angle = 35, hjust = 1))
+
+```
+
+### Father history {-#father-history}
+
+```{r father_hist, echo = FALSE, cache = TRUE, dependson = "sfuns"}
+
+discr_comp(colo_cohort, father_history)
+
+```
+
+### Mother history {-#mother-history}
+
+```{r mother_hist, echo = FALSE, cache = TRUE, dependson = "sfuns"}
+
+discr_comp(colo_cohort, mother_history)
+
+```
+
+### Sibblings history {-#sibblings-history}
+
+```{r sibblings_hist, echo = FALSE, cache = TRUE, dependson = "sfuns"}
+
+discr_comp(colo_cohort, sibblings_history)
+
+```
+
+### Family history {-#family-history}
+
+```{r famiy_hist, echo = FALSE, cache = TRUE, dependson = "sfuns"}
+
+discr_comp(colo_cohort, family_history)
+
+```
+
+### Smoking Status {-#smoking-status}
+
+```{r smoking, echo = FALSE, cache = TRUE, dependson = "sfuns"}
+
+discr_comp(colo_cohort, smoking_status)
+
+```
+
+### Alcohol intake {-#alcohol-intake}
+
+```{r alcohol_intake, echo = FALSE, cache = TRUE, dependson = "sfuns"}
+
+discr_comp(colo_cohort, alcohol_intake)
+
+```
+
+### Vig phys act {-#vig-phys-act}
+
+```{r vig_phys_act, echo = FALSE, cache = TRUE, dependson = "sfuns"}
+
+discr_comp(colo_cohort, vig_phys_act)
+
+```
+
+### Mod phys act {-#mod-phys-act}
+
+```{r mod_phys_act, echo = FALSE, cache = TRUE, dependson = "sfuns"}
+
+discr_comp(colo_cohort, mod_phys_act)
+
+
+```
+
+### Ethnicity {-#ethnicity}
+
+```{r ethnicity, echo = FALSE, cache = TRUE, dependson = "sfuns"}
+
+discr_comp(colo_cohort, ethnicity) +
+  theme(axis.text.x = element_text(angle = 35, hjust = 1))
+
+```
+
+## Principal component analysis {.tabset .tabset-fade}
+
+We used `plink2` [@Galinsky2016-nq] to compute to compute the top 20 principal components. Originally, I planned to use `flashPCA` (@Abraham2014-pc, @Abraham2017-bl) since it was the method used in the [UKBiobank QC document](http://www.ukbiobank.ac.uk/wp-content/uploads/2014/04/UKBiobank_genotyping_QC_documentation-web.pdf), but it turns out that both programs use the same software. The general process to calculate the principal components of GWAS data is to:
+
+1. Compute LD matrices for every chromosome. To accelerate the processing, we only computed the LD between pairs of SNPs with a distance of at most 1 kb, and trimmed SNPs with LD $\geq 0.1$. This resulted in a list of representative SNPs in each chromosome.
+2. Subset these SNPs from the UKBiobank dataset, and build a unified genotype file
+3. Compute the principal components
+
+Below, I explore the results of the principal component analysis computed with `plink2`:
+
+```{r eig-values, include = TRUE, echo = FALSE, eval = TRUE, fig.width = 4, fig.height = 3, out.width = 400, fig.cap = "Top 20 eigenvalues computed by `plink2`"}
+
+pca_results[["values"]] %>%
+  ggplot(aes(id, eig_values)) +
+  geom_point(colour = "steelblue", size = 2) +
+  geom_line(colour = "steelblue") +
+  theme_classic() +
+  labs( x = NULL, y = "eigvalues")
+
+```
+
+Below, we compare the 4 principal components colour by ethnicity. I picked the first 4 components because there is a buimp after the forth component. For these figures, it is expected for the different ethnicity labels to be clustered together. In the [UKBiobank QC document](http://www.ukbiobank.ac.uk/wp-content/uploads/2014/04/UKBiobank_genotyping_QC_documentation-web.pdf) there some comparisons done with less samples of the UKBiobank dataset, and the figures look very similar.
+
+```{r princomp, include = TRUE, echo = FALSE, echo = TRUE, fig.width = 9, fig.height = 7, out.width = 1200, cache = TRUE}
+
+theme_set( theme_bw() + theme(strip.background = element_blank()))
+
+my_scatter <- function(data, mapping){
+
+  col_vals <- unique(data$ethnicity)
+  cols <- Polychrome::green.armytage.colors(length(col_vals)) %>%
+    set_names(col_vals)
+
+  ggplot(data = data, mapping = mapping) +
+    geom_point(alpha = 1 / 10) +
+    geom_rug() +
+    scale_color_manual(values = cols) +
+    guides(colour = ggplot2::guide_legend(ncol = 1))
+}
+
+```
+
+### PC1 vs PC2 {-#pc1-vs-pc2}
+
+```{r pca1vs2, include = TRUE, echo = FALSE, fig.width = 9, fig.height = 7, out.width = 1200, cache = TRUE, dependson = "princomp"}
+
+my_scatter(pca_results[["vectors"]], aes(pc_1, pc_2, colour = ethnicity))
+
+```
+
+### PC1 vs PC3 {-#pc1-vs-pc3}
+
+```{r pca1vs3, include = TRUE, echo = FALSE, fig.width = 9, fig.height = 7, out.width = 1200, cache = TRUE, dependson = "princomp"}
+
+my_scatter(pca_results[["vectors"]], aes(pc_1, pc_3, colour = ethnicity))
+
+```
+
+### PC1 vs PC4 {-#pc1-vs-pc4}
+
+```{r pca1vs4, include = TRUE, echo = FALSE, fig.width = 9, fig.height = 7, out.width = 1200, cache = TRUE, dependson = "princomp"}
+
+my_scatter(pca_results[["vectors"]], aes(pc_1, pc_4, colour = ethnicity))
+
+```
+
+### PC2 vs PC3 {-#pc2-vs-pc3}
+
+```{r pca2vs3, include = TRUE, echo = FALSE, fig.width = 9, fig.height = 7, out.width = 1200, cache = TRUE, dependson = "princomp"}
+
+my_scatter(pca_results[["vectors"]], aes(pc_2, pc_3, colour = ethnicity))
+
+```
+
+### PC2 vs PC4 {-#pc2-vs-pc4}
+
+```{r pca2vs4, include = TRUE, echo = TRUE, fig.width = 9, fig.height = 7, out.width = 1200, cache = TRUE, dependson = "princomp"}
+
+my_scatter(pca_results[["vectors"]], aes(pc_2, pc_4, colour = ethnicity))
+
+```
+
+### PC3 vs PC4 {-#pc3-vs-pc4}
+
+```{r pca3vs4, include = TRUE, echo = FALSE, fig.width = 9, fig.height = 7, out.width = 1200, cache = TRUE, dependson = "princomp"}
+
+my_scatter(pca_results[["vectors"]], aes(pc_3, pc_4, colour = ethnicity))
+
+```
+
+## Genome-wide association study models {.tabset .tabset-fade}
+
+We utilized `plink2` [@Hill2017-vh] to compute linear / logistic models of the form:
+
+$$
+\begin{aligned}
+y_i &= g_i \beta_G + \mathbf{x}_i^T \beta_X + e_i \quad\text{for vitamin D}\\
+y_i &\sim \text{Ber}(\text{logit}^{-1}( g_i \beta_G + \mathbf{x}_i^T \beta_X))\quad \text{for colorectal cancer status}
+\end{aligned}
+$$
+
+### Vit D {-#vit-d}
+
+```{r vitd-manhattan, include = TRUE, echo = FALSE, eval = TRUE, out.width = '100%', fig.align = "default"}
+
+
+```
+
+### Sqrt Vit D {-#sqrt-vit-d}
+
+```{r vitd-manhattan, include = TRUE, echo = FALSE, eval = TRUE, out.width = '100%', fig.align = "default"}
+
+
+```
+
+### Log Vit D {-#log-vit-d}
+
+
+```{r vitd-manhattan, include = TRUE, echo = FALSE, eval = TRUE, out.width = '100%', fig.align = "default"}
+
+
+```
+
+
+
+
+
+# References
+

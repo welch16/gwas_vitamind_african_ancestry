@@ -1,0 +1,401 @@
+--- 
+title: "Genome-Wide Association Study of Vitamin D and Vitamin D Binding Protein in Individuals of African Descent"
+author: "Rene Welch"
+bibliography: colo.bib
+output:
+  bookdown::html_document2:
+    toc: true
+    theme: spacelab
+    fig_caption: true
+    code_folding: hide
+---
+
+```{r setup, echo = FALSE, message = FALSE, warning = FALSE, cache = FALSE}
+
+knitr::opts_chunk$set(include = TRUE, eval = TRUE, cache = TRUE,
+  echo = TRUE, autodep = TRUE, fig.align = "center",
+  message = FALSE, warning = FALSE, fig.ext = "png")
+
+pacman::p_load(
+  magrittr,
+  tidyverse,
+  scales,
+  cowplot,
+  qs,
+  rlang,
+  gwasrapidd,
+  UWCCC.GWAS,
+  gt, gtsummary, flextable)
+
+unloadNamespace("here")
+
+```
+
+```{r previous-results, include = FALSE, echo = FALSE, eval = TRUE, cache = TRUE}
+
+prev_studies <-
+  qs::qread(here::here("results", "zz_methods", "qs",
+    "previous_studies_results.qs"))
+
+```    
+
+```{r ukbiobank-vdbp, include = FALSE, echo = FALSE, eval = TRUE, cache = TRUE}
+
+ukbiobank_vdbp <-
+  qs::qread(
+    here::here("results", "zz_methods", "qs", "ukbiobank_vitd_stats.qs"))
+
+ukbiobank_vdbp %<>%
+  dplyr::mutate(p = 2 * pnorm(-abs(t_stat)))
+
+```
+
+```{r sccs-hydroxy, include = FALSE, echo = FALSE, eval = TRUE, cache = TRUE}
+
+sccs_hydroxy <-
+  qs::qread(here::here("results", "zz_methods", "qs", "sccs_hydroxy_stats.qs"))
+
+sccs_hydroxy %<>%
+  dplyr::mutate(p = 2 * pnorm(-abs(t_stat)))
+
+
+```
+
+```{r sccs-vdbp, include = FALSE, echo = FALSE, eval = TRUE, cache = TRUE}
+
+sccs_vdbp <-
+  qs::qread(here::here("results", "zz_methods", "qs", "sccs_vdbp_stats.qs"))
+
+sccs_vdbp %<>%
+  dplyr::mutate(p = 2 * pnorm(-abs(t_stat)))
+
+```
+
+# Tables
+
+## Table 1: SNPs associated with vitamin D binding protein, SCCS
+
+## Table 2: SNPs associated with 25-hydroxyvitamin D, SCCS and UK Biobank for participants of African Ancestry
+
+## Table 3: SNPs associated with 25-hydroxyvitamin D, UK Biobank for participants of Asian Ancestry
+
+## Table 4: Associations of previously identified GWAS-significant SNPs with 25-hydroxyvitamin in the SCCS and UK Biobank for participants of African Ancestry
+
+## Table 5. Associations of previously identified GWAS-significant SNPs with 25-hydroxyvitamin D in UK Biobank for participants of Asian-ancestry.
+
+# Figures
+
+## Figure 1: Manhattan plot displaying the associations between genomic loci and vitamin D binding protein in the Southern Community Cohort Study
+
+```{r sccs-vdbp-manhattan, include = TRUE, echo = FALSE, eval = TRUE, fig.width = 12, fig.height = 4.5, out.width = "100%", cache = TRUE, dependson = "sccs-vdbp"}
+
+sccs_vdbp %>%
+  UWCCC.GWAS::manhattan_plot(sig = 5e-8, sig_color = "red") +
+  labs(
+    x = NULL,
+    y = expression(-log[10](p))) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    panel.border = element_blank(),
+    axis.ticks.x = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    axis.text.x = element_text(angle = 90, size = 8, vjust = 0.5))
+
+```
+
+## Figure 2: Regional Association Plots for each of the GWAS significant SNPs associated with vitamin D binding protein
+
+
+## Figure 3: Manhattan plot displaying the associations between genomic loci and 25-hydroxyvitamin D in the Souther Community Cohort Study
+
+```{r sccs-hydroxy-manhattan, include = TRUE, echo = FALSE, eval = TRUE, fig.width = 12, fig.height = 4.5, out.width = "100%", cache = TRUE, dependson = "sccs-hydroxy"}
+
+sccs_hydroxy %>%
+  UWCCC.GWAS::manhattan_plot(
+    sig = 5e-8, sig_color = "red") +
+  labs(
+    x = NULL,
+    color = "chr",
+    y = expression(-log[10](p))) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    panel.border = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    axis.text.x = element_text(angle = 90, size = 8, vjust = 0.5))
+
+
+```
+
+## Figure 3': Manhattan plot displaying the associations between genomic loci and 25-hydroxyvitamin D in the UK Biobank
+
+```{r ukbiobank-vdbp-manhattan, include = TRUE, echo = FALSE, eval = TRUE, fig.width = 12, fig.height = 4.5, out.width = "100%", cache = TRUE, dependson = "ukbiobank-vdbp"}
+
+ukbiobank_vdbp %>%
+  UWCCC.GWAS::manhattan_plot(
+    sig = 5e-8, sig_color = "red") +
+      labs(
+    x = NULL,
+    color = "chr",
+    y = expression(-log[10](p))) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    panel.border = element_blank(),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    axis.text.x = element_text(angle = 90, size = 8, vjust = 0.5))
+
+```
+
+## Figure 4: Manhattan plot displaying the associations between genomic loci and 25-hydroxyvitamin D in the UK Biobank for European-Ancestry participants
+
+## Figure 5: Manhattan plot displaying the associations between genomic loci and 25-hydroxyvitamin D in the UK Biobank for African-Ancestry participants
+
+## Figure 6: Manhattan plot displaying the associations between genomic loci and 25-hydroxyvitamin D in the UK Biobank for Asian-Ancestry participants
+
+
+## Figure 7: Regional association plots for each of the GWAS-significant SNPS associated with 25-hydroxyvitamin D
+
+
+
+## Figure 8-X: Functional analysis plots
+
+# Supplement Tables
+
+## Tables 1-2: Selected characteristics of study participant UK Biobank / Southern Cohort Community Study
+
+I think that we need to stratify the UK Biobank table by ethnicity too
+
+# Supplement Figures
+
+## qqplot SCCS vdbp
+
+```{r sccs-vdbp-qqplot, include = TRUE, echo = FALSE, eval = TRUE, fig.width = 6, fig.height = 6, out.width = "40%", cache = TRUE, dependson = "sccs-vdbp"}
+
+sccs_vdbp %>%
+  UWCCC.GWAS::qqplot_pvalue() +
+   theme_minimal() +
+    theme(
+      legend.position = "none",
+      panel.border = element_blank())
+
+```
+
+## qqplot SCCS hydroxyvitamin D
+
+```{r sccs-hydroxy-qqplot, include = TRUE, echo = FALSE, eval = TRUE, fig.width = 6, fig.height = 6, out.width = "40%", cache = TRUE, dependson = "sccs-hydroxy"}
+
+sccs_hydroxy %>%
+  UWCCC.GWAS::qqplot_pvalue() +
+   theme_minimal() +
+    theme(
+      legend.position = "none",
+      panel.border = element_blank())
+
+```
+
+## qqplot UK Biobank 25hydroxyvitamin D 
+
+```{r ukbiobank-vdbp-qqplot, include = TRUE, echo = FALSE, eval = TRUE, fig.width = 6, fig.height = 6, out.width = "40%", cache = TRUE, dependson = "ukbiobank-vdbp"}
+
+ukbiobank_vdbp %>%
+  UWCCC.GWAS::qqplot_pvalue() +
+   theme_minimal() +
+    theme(
+      legend.position = "none",
+      panel.border = element_blank())
+
+```
+
+## qqplot UK Biobank 25hydroxyvitamin D for European-Ancestry
+
+## qqplot UK Biobank 25hydroxyvitamin D for African-Ancestry
+
+## qqplot UK Biobank 25hydroxyvitamin D for Asian-Ancestry
+
+## PCA plots?
+
+## Supplementary table 1
+
+```{r supp-table-sccs-prepare, include = FALSE, echo = FALSE, eval =  TRUE, cache = TRUE}
+
+data_dir <- here::here("extracted_data", "SCCS")
+vitd_pheno <- here::here("results/2020_09_01_merge_impute_sccs", "plink2",
+  "SCCS_merged_vdbp_cancer_chr1_rsq50_vitdbp_pheno.txt") %>%
+  readr::read_delim(" ") %>%
+  dplyr::select(IID, vitd) %>%
+  dplyr::rename_with(snakecase::to_snake_case)
+
+
+# covariates #################################################################
+
+vitd_data <- file.path(data_dir, "vitamind_phenotypes.txt") %>%
+  readr::read_tsv()
+
+vitd_data %<>%
+  dplyr::rename_all(list(snakecase::to_snake_case))
+
+
+## age
+
+vitd_data %<>%
+  dplyr::mutate(
+    age = case_when(
+      enrollment_age < 50 ~ "< 50",
+      enrollment_age <= 54 ~ "50 - 54",
+      enrollment_age <= 59 ~ "55 - 59",
+      enrollment_age <= 64 ~ "60 - 64",
+      TRUE ~ ">= 65"))
+
+# enrollment source appears to be C for everything
+vitd_data %<>%
+  dplyr::rename(iid = id_number) %>%
+  dplyr::mutate(fid = iid)
+
+
+# get samples
+sample_data <- tibble(file = file.path(data_dir, "imputation",
+  "merge_impute", "qc_filtered") %>%
+  list.files(full.names = TRUE, pattern = ".fam", recursive = TRUE)) %>%
+  mutate(
+    rsq = if_else(str_detect(file, "rsq50"), "rsq50", "rsq30"),
+    samples = map(file, vroom::vroom, col_names = FALSE),
+    samples = map(samples, dplyr::rename,
+      fid = X1,
+      iid = X2,
+      pat = X3,
+      mat = X4,
+      sex2 = X5,
+      pheno = X6),
+    name = basename(file)) %>%
+  select(name, everything(), -file)
+
+sample_data %<>%
+  dplyr::filter(rsq == "rsq50") %>%
+  dplyr::distinct(samples) %>%
+  tidyr::unnest(cols = c(samples)) %>%
+  dplyr::distinct(iid)
+
+vitd_data %<>%
+  dplyr::mutate(
+    hh_income = case_when(
+      hh_income == 9999 ~ NA_character_,
+      hh_income <= 1 ~ "A",
+      hh_income <= 3 ~ "B",
+      TRUE ~ "C"),
+    hh_income = forcats::fct_explicit_na(hh_income, "NONE"))
+
+vitd_data %<>%
+  dplyr::mutate(iid = str_c(iid, iid, sep = "_")) %>%
+  dplyr::inner_join(sample_data, by = "iid") %>%
+  dplyr::rename(household_income = hh_income)
+
+summarize_family_history <- function(
+  f_hist, m_hist, b_hist, s_hist) {
+
+  # 0 no
+  # 1 yes
+  # 7777 - not aplicable
+  # 9999 - dont know
+
+  return(
+    case_when(
+      f_hist == 1 | m_hist == 1 | b_hist == 1 | s_hist == 1 ~ TRUE,
+      f_hist %in% c(0, 7777) & m_hist %in% c(0, 7777) &
+      b_hist %in% c(0, 7777) & s_hist %in% c(0, 7777) ~ FALSE,
+      TRUE ~ NA))
+}
+
+vitd_data %<>%
+  dplyr::rename(
+    si_colorectal_cancer = si_colorectalcancer) %>%
+  dplyr::mutate(
+    colorectal_fh = summarize_family_history(
+      fa_colorectal_cancer,
+      mo_colorectal_cancer,
+      br_colorectal_cancer,
+      si_colorectal_cancer),
+    colon_fh = summarize_family_history(
+      fa_colon_cancer,
+      mo_colon_cancer,
+      br_colon_cancer,
+      si_colon_cancer),
+    family_history = case_when(
+      colorectal_fh | colon_fh ~ "yes",
+      ! colorectal_fh & ! colon_fh ~ "no",
+      TRUE ~ "NONE"))
+
+vitd_data %<>%
+  dplyr::mutate(
+    smoking_status = case_when(
+      ever_smoker == 0 ~ "never",
+      smoke_now == 1 ~ "current",
+      smoke_now == 0 ~ "former"),
+    alcohol = if_else(alcohol_per_day == 0, "no", "yes"),
+    alcohol = forcats::fct_explicit_na(alcohol, "NONE"))
+
+vitd_data %<>%
+  dplyr::mutate(
+    education = case_when(
+      education <= 2 ~ "< high school", # < high school
+      education == 3 ~ "high school", # high school,
+      TRUE ~ "> high school")) # > high school %>
+
+
+vitd_data %<>%
+  dplyr::mutate(
+    bmi = if_else(bmi >= 30, "bmi >= 30", "bmi < 30"),
+    insurance_coverage = case_when(
+      insurance_coverage == 0 ~ "no",
+      insurance_coverage == 1 ~ "yes",
+      TRUE ~ "NONE"),
+    insurance_coverage = factor(insurance_coverage, levels = c("yes", "no",
+      "NONE")))
+
+vitd_data %<>%
+  dplyr::inner_join(vitd_pheno, by = "iid")
+
+vitd_data %>%
+  dplyr::select(iid, age, sex, education, household_income,
+    insurance_coverage, bmi,
+    family_history, smoking_status,
+    alcohol, contains("met"), -contains("sleep"), -contains("total"),
+    -contains("sit"), -contains("spor"), vitd, enrollment_age) %>%
+  readr::write_csv(
+    here::here("results", "zz_methods", "csv",
+      "sccs_vitdbp_phenotype_supp2_raw.csv"))
+  
+
+```
+
+```{r supp-table-sccs, include = TRUE, echo = FALSE, eval = TRUE, cache = TRUE, dependson = "supp-table-sccs-prepare"}
+
+vitd_data %>%
+  dplyr::select(age, sex, education, household_income,
+    insurance_coverage, bmi,
+    family_history, smoking_status,
+    alcohol, contains("met"), -contains("sleep"), -contains("total"),
+    -contains("sit"), -contains("spor"), vitd, enrollment_age) %>%
+  gtsummary::tbl_summary() %>%
+  gtsummary::add_n()
+
+```
+
+```{r}
+vitd_data$enrollment_age %>% median()
+vitd_data$enrollment_age %>% mad()
+
+vitd_data$vitd %>% median()
+vitd_data$vitd %>% mad()
+vitd_data$vitd %>% summary()
+
+vitd_data$vitd %>% log() %>% median()
+vitd_data$vitd %>% log() %>% mad()
+
+ukbiobank_vdbp %>% dplyr::filter(p <= 5e-8) %>% nrow()
+
+```
